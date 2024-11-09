@@ -5,7 +5,7 @@ import java.io.Serializable
 /**
  * This interface provides methods for setting various types of data to be returned as navigation results.
  */
-interface NavigationResult {
+interface Navigationhandler {
 
     /**
      * Sets a string value associated with the specified key.

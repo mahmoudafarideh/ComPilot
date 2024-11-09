@@ -4,7 +4,7 @@ import androidx.navigation.NavController
 import m.a.compilot.common.RouteNavigator
 import m.a.compilot.navigation.options.NavigationOptionsBuilder
 import m.a.compilot.navigation.options.NavigationOptionsBuilderImp
-import m.a.compilot.navigation.result.NavigationResult
+import m.a.compilot.navigation.result.Navigationhandler
 
 data class ComPilotNavControllerImp(
     override val navController: NavController,
@@ -18,7 +18,7 @@ data class ComPilotNavControllerImp(
 
     override fun setResult(
         key: String,
-        result: NavigationResult.() -> Unit
+        result: Navigationhandler.() -> Unit
     ): PopBackstackController {
         navigationOptionsBuilder.setResult(key, result)
         return this
@@ -83,14 +83,4 @@ data class ComPilotNavControllerImp(
         navigationOptionsBuilder.checkNotInRoute(*route)
         return this
     }
-}
-
-private fun setArguments(routeName: String, args: Map<String, Any?>?): String {
-    return args?.let {
-        var route = routeName
-        it.forEach { (argName, argValue) ->
-            route = route.replace("{$argName}", argValue.toString())
-        }
-        route
-    } ?: routeName
 }

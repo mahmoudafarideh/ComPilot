@@ -4,7 +4,7 @@ import androidx.core.os.bundleOf
 import java.io.Serializable
 
 
-internal class NavigationResultImp(val key: String) : NavigationResult {
+internal class NavigationResultImp(val key: String) : Navigationhandler {
 
     override fun setString(key: String, value: String) {
         _arguments += key to value

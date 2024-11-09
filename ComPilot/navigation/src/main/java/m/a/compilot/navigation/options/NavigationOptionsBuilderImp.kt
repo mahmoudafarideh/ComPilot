@@ -3,7 +3,7 @@ package m.a.compilot.navigation.options
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination
 import androidx.navigation.NavOptionsBuilder
-import m.a.compilot.navigation.result.NavigationResult
+import m.a.compilot.navigation.result.Navigationhandler
 import m.a.compilot.navigation.result.NavigationResultImp
 
 
@@ -18,7 +18,7 @@ internal class NavigationOptionsBuilderImp : NavigationOptionsBuilder {
         shouldClearBackStack = true
     }
 
-    override fun setResult(key: String, result: NavigationResult.() -> Unit) {
+    override fun setResult(key: String, result: Navigationhandler.() -> Unit) {
         results += NavigationResultImp(key).apply(result)
     }
 
