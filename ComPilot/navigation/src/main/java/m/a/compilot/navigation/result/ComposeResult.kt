@@ -31,4 +31,16 @@ class ComposeResult(val savedStateHandle: Bundle) {
     fun containsKey(key: String): Boolean {
         return savedStateHandle.containsKey(key)
     }
+
+    fun getInt(key: String): Int {
+        return savedStateHandle.getInt(key)
+    }
+
+    fun getDouble(key: String): Double {
+        return savedStateHandle.getDouble(key)
+    }
+
+    fun getFloat(key: String): Float {
+        return savedStateHandle.getFloat(key)
+    }
 }

@@ -1,6 +1,7 @@
 package m.a.compilot
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -15,12 +16,14 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.delay
 import m.a.compilot.navigation.LocalNavController
+import m.a.compilot.navigation.NavigationResultHandler
 import m.a.compilot.navigation.comPilotNavController
 import m.a.compilot.routes.dialog
 import m.a.compilot.routes.navigator
@@ -45,6 +48,12 @@ class MainActivity : ComponentActivity() {
                                 delay(2_000)
                                 navController.navigate(DialogRoute(1).navigator)
                             }
+                            val context = LocalContext.current
+                            it.navBackStackEntry.NavigationResultHandler {
+                                this.handleNavigationResult("DialogResult") {
+                                    Toast.makeText(context, "The arg is ${this.getInt("DialogId")}", Toast.LENGTH_SHORT).show()
+                                }
+                            }
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -55,7 +64,11 @@ class MainActivity : ComponentActivity() {
                             val navController = LocalNavController.comPilotNavController
                             LaunchedEffect(Unit) {
                                 delay(2_000)
-                                navController.safePopBackStack()
+                                navController
+                                    .setResult("DialogResult") {
+                                        this.setInt("DialogId", it.argument.id)
+                                    }
+                                    .safePopBackStack()
                                 navController.safePopBackStack()
                             }
                             Box(
