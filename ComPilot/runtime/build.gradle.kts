@@ -35,5 +35,5 @@ android {
 dependencies {
     implementation(libs.compose.navigation)
     implementation(libs.compose.material)
-    api(project(":ComPilot:common"))
+    api(libs.compilot.common)
 }

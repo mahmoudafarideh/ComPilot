@@ -17,5 +17,5 @@ kotlin {
 
 dependencies {
     implementation(libs.ksp)
-    implementation(project(":ComPilot:common"))
+    implementation(libs.compilot.common)
 }

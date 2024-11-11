@@ -45,19 +45,56 @@ class MainActivity : ComponentActivity() {
                         FullScreenRoute.screen(this) {
                             val navController = LocalNavController.comPilotNavController
                             LaunchedEffect(Unit) {
-                                delay(2_000)
-                                navController.navigate(DialogRoute(1).navigator)
+                                if(it.argument.title == "Tesla") {
+                                    delay(2_000)
+                                    navController.navigate(DialogRoute(1).navigator)
+                                }
                             }
                             val context = LocalContext.current
                             it.navBackStackEntry.NavigationResultHandler {
                                 this.handleNavigationResult("DialogResult") {
-                                    Toast.makeText(context, "The arg is ${this.getInt("DialogId")}", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(
+                                        context,
+                                        "The arg is ${this.getInt("DialogId")}",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    navController.navigate(
+                                        FullScreenWithNestedArgRoute(
+                                            nested = FullScreenWithNestedArgRoute.NestedData(
+                                                1,
+                                                "Name"
+                                            ),
+                                            child = FullScreenWithNestedArgRoute.Child.Child1
+                                        ).navigator
+                                    )
                                 }
                             }
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .background(Color.Red)
+                            )
+                        }
+                        FullScreenWithNestedArgRoute.screen(this) {
+                            val navController = LocalNavController.comPilotNavController
+                            LaunchedEffect(Unit) {
+                                delay(2_000)
+                                navController
+                                    .clearBackStack()
+                                    .navigate(FullScreenRoute("Another Title").navigator)
+                            }
+                            val context = LocalContext.current
+                            LaunchedEffect(Unit) {
+                                Toast.makeText(
+                                    context,
+                                    "The arg is ${it.argument}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.Cyan)
                             )
                         }
                         DialogRoute.dialog(this) {

@@ -9,6 +9,8 @@ espressoCore = "3.6.1"
 appcompat = "1.7.0"
 material = "1.12.0"
 
+compilot = "1.0.0-beta03"
+
 compose = "2.8.7"
 compose-ui = "1.7.5"
 compose-material = "1.7.0-beta01"
@@ -41,6 +43,12 @@ androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-man
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 ksp = { group = "com.google.devtools.ksp", name = "symbol-processing-api", version.ref = "ksp" }
+
+compilot-runtime = { group = "io.github.mahmoudafarideh.compilot", name = "runtime", version.ref = "compilot" }
+compilot-compiler = { group = "io.github.mahmoudafarideh.compilot", name = "compiler", version.ref = "compilot" }
+compilot-navigation = { group = "io.github.mahmoudafarideh.compilot", name = "navigation", version.ref = "compilot" }
+
+compilot-common = { group = "io.github.mahmoudafarideh.compilot", name = "common", version.ref = "compilot" }
 
 
 [plugins]

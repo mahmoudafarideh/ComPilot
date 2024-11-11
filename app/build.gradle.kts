@@ -63,9 +63,9 @@ dependencies {
 
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
-    implementation(project(":ComPilot:runtime"))
-    implementation(project(":ComPilot:navigation"))
-    ksp(project(":ComPilot:compiler"))
+    implementation(libs.compilot.runtime)
+    implementation(libs.compilot.navigation)
+    ksp(libs.compilot.compiler)
     implementation(libs.lifecycle)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))

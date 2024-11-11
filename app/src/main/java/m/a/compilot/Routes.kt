@@ -10,6 +10,24 @@ data class FullScreenRoute(
     companion object
 }
 
+@RouteNavigation
+data class FullScreenWithNestedArgRoute(
+    val nested: NestedData,
+    val child: Child
+) {
+    data class NestedData(
+        val id: Int,
+        val name: String,
+    )
+
+    enum class Child {
+        Child1,
+        Child2
+    }
+
+    companion object
+}
+
 @RouteNavigation(type = RouteType.Dialog)
 data class DialogRoute(
     val id: Int
