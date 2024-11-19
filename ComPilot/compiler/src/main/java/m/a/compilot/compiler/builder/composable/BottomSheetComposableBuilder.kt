@@ -10,7 +10,8 @@ class BottomSheetComposableBuilder : ComposableBuilder {
         navigationBuilder: NavigationBuilder
     ): String {
         val argumentType = classDeclaration.simpleName.asString()
-        return "${navigationBuilder.objectExtensionPrefix(classDeclaration)}.bottomSheet(\n" +
+        return "@OptIn(ExperimentalMaterialNavigationApi::class)\n" +
+                "${navigationBuilder.objectExtensionPrefix(classDeclaration)}.bottomSheet(\n" +
                 "    navGraphBuilder: NavGraphBuilder,\n" +
                 "    deepLinks: List<NavDeepLink> = emptyList(),\n" +
                 "    content: @Composable ColumnScope.(RouteStack<$argumentType>) -> Unit\n" +

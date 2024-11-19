@@ -34,6 +34,6 @@ android {
 
 dependencies {
     implementation(libs.compose.navigation)
-    implementation(libs.compose.material)
+    implementation(libs.accompanist.navigation.material)
     api(libs.compilot.common)
 }

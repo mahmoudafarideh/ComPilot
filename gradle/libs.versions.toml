@@ -12,13 +12,13 @@ material = "1.12.0"
 compilot = "1.0.0-beta03"
 
 compose = "2.8.7"
-compose-ui = "1.7.5"
-compose-material = "1.7.0-beta01"
+compose-ui = "1.6.8"
 lifecycle = "2.8.7"
 navigation = "2.8.3"
 activityCompose = "1.9.3"
 composeBom = "2024.10.01"
 jetbrainsKotlinJvm = "2.0.0"
+accompanist = "0.34.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -33,7 +33,8 @@ lifecycle = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", vers
 compose-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle" }
 compose-viewmodel = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "compose" }
 compose-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "compose-ui" }
-compose-material = { group = "androidx.compose.material", name = "material-navigation", version.ref = "compose-material" }
+accompanist-navigation-material = { group = "com.google.accompanist", name = "accompanist-navigation-material", version.ref = "accompanist"}
+compose-material = { group = "androidx.compose.material", name = "material", version.ref = "compose-ui"}
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }

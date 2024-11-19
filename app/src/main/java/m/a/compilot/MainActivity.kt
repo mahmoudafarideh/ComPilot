@@ -21,101 +21,125 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.plusAssign
+import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
+import com.google.accompanist.navigation.material.ModalBottomSheetLayout
+import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
 import kotlinx.coroutines.delay
 import m.a.compilot.navigation.LocalNavController
 import m.a.compilot.navigation.NavigationResultHandler
 import m.a.compilot.navigation.comPilotNavController
+import m.a.compilot.routes.bottomSheet
 import m.a.compilot.routes.dialog
 import m.a.compilot.routes.navigator
 import m.a.compilot.routes.screen
 import m.a.compilot.ui.theme.ComPilotTheme
 
 class MainActivity : ComponentActivity() {
+    @OptIn(ExperimentalMaterialNavigationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             ComPilotTheme {
                 val navigation = rememberNavController()
+                val bottomSheetNavigator = rememberBottomSheetNavigator()
+
                 CompositionLocalProvider(LocalNavController provides navigation) {
-                    NavHost(
-                        navController = navigation,
-                        startDestination = FullScreenRoute("Tesla").navigator()
+                    navigation.navigatorProvider += bottomSheetNavigator
+                    ModalBottomSheetLayout(
+                        sheetContentColor = Color.Unspecified,
+                        modifier = Modifier,
+                        bottomSheetNavigator = bottomSheetNavigator
                     ) {
-                        FullScreenRoute.screen(this) {
-                            val navController = LocalNavController.comPilotNavController
-                            LaunchedEffect(Unit) {
-                                if(it.argument.title == "Tesla") {
-                                    delay(2_000)
-                                    navController.navigate(DialogRoute(1).navigator)
+                        NavHost(
+                            navController = navigation,
+                            startDestination = FullScreenRoute("Tesla").navigator()
+                        ) {
+                            FullScreenRoute.screen(this) {
+                                val navController = LocalNavController.comPilotNavController
+                                LaunchedEffect(Unit) {
+                                    if (it.argument.title == "Tesla") {
+                                        delay(2_000)
+                                        navController.navigate(BottomSheetRoute("Label").navigator)
+                                    }
                                 }
+                                val context = LocalContext.current
+                                it.navBackStackEntry.NavigationResultHandler {
+                                    this.handleNavigationResult("DialogResult") {
+                                        Toast.makeText(
+                                            context,
+                                            "The arg is ${this.getInt("DialogId")}",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        navController.navigate(
+                                            FullScreenWithNestedArgRoute(
+                                                nested = FullScreenWithNestedArgRoute.NestedData(
+                                                    1,
+                                                    "Name"
+                                                ),
+                                                child = FullScreenWithNestedArgRoute.Child.Child1
+                                            ).navigator
+                                        )
+                                    }
+                                }
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(Color.Red)
+                                )
                             }
-                            val context = LocalContext.current
-                            it.navBackStackEntry.NavigationResultHandler {
-                                this.handleNavigationResult("DialogResult") {
+                            FullScreenWithNestedArgRoute.screen(this) {
+                                val navController = LocalNavController.comPilotNavController
+                                LaunchedEffect(Unit) {
+                                    delay(2_000)
+                                    navController
+                                        .clearBackStack()
+                                        .navigate(FullScreenRoute("Another Title").navigator)
+                                }
+                                val context = LocalContext.current
+                                LaunchedEffect(Unit) {
                                     Toast.makeText(
                                         context,
-                                        "The arg is ${this.getInt("DialogId")}",
+                                        "The arg is ${it.argument}",
                                         Toast.LENGTH_SHORT
                                     ).show()
-                                    navController.navigate(
-                                        FullScreenWithNestedArgRoute(
-                                            nested = FullScreenWithNestedArgRoute.NestedData(
-                                                1,
-                                                "Name"
-                                            ),
-                                            child = FullScreenWithNestedArgRoute.Child.Child1
-                                        ).navigator
-                                    )
                                 }
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(Color.Cyan)
+                                )
                             }
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(Color.Red)
-                            )
-                        }
-                        FullScreenWithNestedArgRoute.screen(this) {
-                            val navController = LocalNavController.comPilotNavController
-                            LaunchedEffect(Unit) {
-                                delay(2_000)
-                                navController
-                                    .clearBackStack()
-                                    .navigate(FullScreenRoute("Another Title").navigator)
+                            DialogRoute.dialog(this) {
+                                val navController = LocalNavController.comPilotNavController
+                                LaunchedEffect(Unit) {
+                                    delay(2_000)
+                                    navController
+                                        .setResult("DialogResult") {
+                                            this.setInt("DialogId", it.argument.id)
+                                        }
+                                        .safePopBackStack()
+                                    navController.safePopBackStack()
+                                }
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(200.dp)
+                                        .background(Color.Blue)
+                                )
                             }
-                            val context = LocalContext.current
-                            LaunchedEffect(Unit) {
-                                Toast.makeText(
-                                    context,
-                                    "The arg is ${it.argument}",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                            BottomSheetRoute.bottomSheet(this) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(200.dp)
+                                        .background(Color.Green)
+                                )
                             }
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(Color.Cyan)
-                            )
-                        }
-                        DialogRoute.dialog(this) {
-                            val navController = LocalNavController.comPilotNavController
-                            LaunchedEffect(Unit) {
-                                delay(2_000)
-                                navController
-                                    .setResult("DialogResult") {
-                                        this.setInt("DialogId", it.argument.id)
-                                    }
-                                    .safePopBackStack()
-                                navController.safePopBackStack()
-                            }
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(200.dp)
-                                    .background(Color.Blue)
-                            )
                         }
                     }
+
                 }
             }
         }
