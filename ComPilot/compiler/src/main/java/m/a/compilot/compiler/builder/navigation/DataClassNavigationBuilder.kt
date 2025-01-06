@@ -25,6 +25,7 @@ class DataClassNavigationBuilder : NavigationBuilder {
                 )
             )
             append(ROUTE_DELIMITER)
+
             appendParameters(parameters)
         }
     }
@@ -33,9 +34,9 @@ class DataClassNavigationBuilder : NavigationBuilder {
         val parameters = classDeclaration.getParameters().flatMap { it.arguments() }
         return parameters.map {
             "navArgument(\"${it.first}\") { \n" +
-                "            type = ${it.second.name.toNavType(it.third)}\n" +
-                "            nullable = ${it.third}\n" +
-                "        }"
+                    "            type = ${it.second.name.toNavType(it.third)}\n" +
+                    "            nullable = ${it.third}\n" +
+                    "        }"
         }
     }
 
@@ -46,7 +47,7 @@ class DataClassNavigationBuilder : NavigationBuilder {
             val replacer = if (!isNullable) {
                 "\${this" + ".${name}}"
             } else {
-                "\${this" + ".${name} ?: \"\"}"
+                "\${this" + ".${name.replace(".", "?.")} ?: \"\"}"
             }
             route = route.replace("{${name}}", replacer)
         }
@@ -109,21 +110,25 @@ class DataClassNavigationBuilder : NavigationBuilder {
         return arguments.map { it.getParameter() }
     }
 
-    private fun KSValueParameter.getParameter(): DataClassParameters {
+    private fun KSValueParameter.getParameter(
+        isParentNullable: Boolean? = null
+    ): DataClassParameters {
         this.type.classDeclaration?.let {
             if (it.modifiers.contains(Modifier.DATA)) {
                 return DataClassParameters.DataClassParameter(
                     name = name!!.asString(),
                     clazz = it.qualifiedName!!.asString(),
                     parameters = it.primaryConstructor!!.parameters.map { parameter ->
-                        parameter.getParameter()
-                    }
+                        parameter.getParameter(isNullable())
+                    },
+                    isNullable = isNullable()
                 )
             } else if (it.classKind == ClassKind.ENUM_CLASS) {
                 return DataClassParameters.EnumParameter(
                     name = name!!.asString(),
                     clazz = it.qualifiedName!!.asString(),
                     isNullable = isNullable(),
+                    isParentNullable = isParentNullable
                 )
             }
         }
@@ -139,13 +144,14 @@ class DataClassNavigationBuilder : NavigationBuilder {
             name!!.asString(),
             typeName,
             isNullable(),
-            receivesEmpty()
+            receivesEmpty(isParentNullable),
+            isParentNullable
         )
     }
 
     private fun KSValueParameter.isNullable() = this.type.resolve().isMarkedNullable
-    private fun KSValueParameter.receivesEmpty() =
-        this.type.resolve().isMarkedNullable || this.type.toString() == "String"
+    private fun KSValueParameter.receivesEmpty(isParentNullable: Boolean?) =
+        isNullable() || isParentNullable == true || this.type.toString() == "String"
 }
 
 sealed class DataClassParameters {
@@ -158,13 +164,14 @@ sealed class DataClassParameters {
         val name: String,
         val type: Type,
         val isNullable: Boolean,
-        val receivesEmpty: Boolean
+        val receivesEmpty: Boolean,
+        val isParentNullable: Boolean? = null
     ) : DataClassParameters() {
 
         enum class Type {
             Int, Float, Double, Long, Boolean, String;
 
-            fun getFromBundle(name: kotlin.String, isNullable: kotlin.Boolean): kotlin.String {
+            fun getFromBundle(name: String, isNullable: Boolean): String {
                 val nullableGetter =
                     if (isNullable) "getString(\"$name\", \"\").takeIf { it.isNotEmpty() }" else ""
                 var result = when (this.toString()) {
@@ -188,17 +195,16 @@ sealed class DataClassParameters {
         }
 
         override fun parameters(): List<Triple<String, Boolean, Boolean>> {
-            return listOf(Triple(name, receivesEmpty, isNullable))
+            return listOf(Triple(name, receivesEmpty, isNullable || isParentNullable == true))
         }
 
         override fun arguments(): List<Triple<String, Type, Boolean>> {
-            return listOf(Triple(name, type, isNullable))
+            return listOf(Triple(name, type, isNullable || isParentNullable == true))
         }
 
         override fun getFromBundleString(prefix: String?): String {
             return "${this.name} = ${
-                type.getFromBundle("${prefix?.let { "$it." } ?: ""}$name",
-                    isNullable)
+                type.getFromBundle("${prefix?.let { "$it." } ?: ""}$name", isNullable)
             }"
         }
     }
@@ -207,14 +213,15 @@ sealed class DataClassParameters {
         val name: String,
         val clazz: String,
         val isNullable: Boolean,
+        val isParentNullable: Boolean? = null
     ) : DataClassParameters() {
 
         override fun parameters(): List<Triple<String, Boolean, Boolean>> {
-            return listOf(Triple(name, false, isNullable))
+            return listOf(Triple(name, isNullable, isNullable))
         }
 
         override fun getFromBundleString(prefix: String?): String {
-            return if (!isNullable) {
+            return if (!isNullable && isParentNullable != true) {
                 "$name = $clazz.valueOf(${
                     PrimitiveParameter.Type.String.getFromBundle(
                         "${prefix?.let { "$it." } ?: ""}$name", false
@@ -237,12 +244,13 @@ sealed class DataClassParameters {
     data class DataClassParameter(
         val name: String,
         val clazz: String,
-        val parameters: List<DataClassParameters>
+        val parameters: List<DataClassParameters>,
+        val isNullable: Boolean
     ) : DataClassParameters() {
         override fun parameters(): List<Triple<String, Boolean, Boolean>> {
             return parameters.flatMap {
                 it.parameters().map { (name, receivesEmpty, isNullable) ->
-                    Triple(this.name + "." + name, receivesEmpty, isNullable)
+                    Triple(this.name + "." + name, receivesEmpty, this.isNullable || isNullable)
                 }
             }
         }
@@ -250,17 +258,31 @@ sealed class DataClassParameters {
         override fun arguments(): List<Triple<String, PrimitiveParameter.Type, Boolean>> {
             return parameters.flatMap {
                 it.arguments().map { (name, type, isNullable) ->
-                    Triple(this.name + "." + name, type, isNullable)
+                    Triple(this.name + "." + name, type, isNullable || this.isNullable)
                 }
             }
         }
 
         override fun getFromBundleString(prefix: String?): String {
+            val arguments = getGroupedParameters().flatten().map {
+                "\"${it.first}\""
+            }
             val parametersBundle = parameters.map {
                 it.getFromBundleString("${prefix?.let { s -> "$s." } ?: ""}$name")
             }
             return buildString {
-                append("$name = $clazz(\n")
+                if(isNullable) {
+                    append("$name = when {\n" +
+                            "                listOf(" +
+                            arguments.joinToString(", ")
+                            +").any {\n" +
+                            "                    this.containsKey(it)\n" +
+                            "                } -> ")
+                } else {
+                    append("$name = ")
+                }
+                append("$clazz(\n")
+
                 parametersBundle.forEachIndexed { index, s ->
                     append("                $s")
                     if (index < parametersBundle.lastIndex) {
@@ -269,6 +291,25 @@ sealed class DataClassParameters {
                     append("\n")
                 }
                 append("            )")
+
+                if(isNullable) {
+                    append("\n" +
+                            "                else -> null\n" +
+                            "            }")
+                }
+            }
+        }
+
+        private fun getGroupedParameters(prefix: String? = null): List<List<Pair<String, DataClassParameters>>> = buildList {
+            val newPrefix = (prefix?.let { "$it." } ?: "") + name
+            parameters.forEach { parameter ->
+                if(parameter is PrimitiveParameter) {
+                    add(listOf("$newPrefix.${parameter.name}" to parameter))
+                } else if(parameter is EnumParameter) {
+                    add(listOf("$newPrefix.${parameter.name}" to parameter))
+                } else if(parameter is DataClassParameter){
+                    addAll(parameter.getGroupedParameters(newPrefix))
+                }
             }
         }
     }

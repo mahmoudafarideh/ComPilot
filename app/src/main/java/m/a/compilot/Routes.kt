@@ -28,6 +28,25 @@ data class FullScreenWithNestedArgRoute(
     companion object
 }
 
+@RouteNavigation
+data class FullScreenWithNestedNullableArgRoute(
+    val nested: NestedData?,
+) {
+    data class NestedData(
+        val test: Test?,
+        val enum: EnumClass?
+    ) {
+        data class Test(
+            val tester: String
+        )
+        enum class EnumClass {
+            One
+        }
+    }
+
+    companion object
+}
+
 @RouteNavigation(type = RouteType.Dialog)
 data class DialogRoute(
     val id: Int

@@ -7,7 +7,8 @@ import com.google.devtools.ksp.processing.SymbolProcessorProvider
 class ComposeNavigationRouteProvider : SymbolProcessorProvider {
     override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor {
         return ComposeNavigationRouteProcessor(
-            codeGenerator = environment.codeGenerator
+            codeGenerator = environment.codeGenerator,
+            logger = environment.logger
         )
     }
 }

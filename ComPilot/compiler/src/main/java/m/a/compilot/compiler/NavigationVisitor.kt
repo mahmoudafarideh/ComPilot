@@ -1,5 +1,6 @@
 package m.a.compilot.compiler
 
+import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSVisitorVoid
 import m.a.compilot.common.RouteNavigation
@@ -13,12 +14,13 @@ import m.a.compilot.compiler.utils.writeLines
 import java.io.OutputStream
 
 class NavigationVisitor(
-    private val file: OutputStream
+    private val file: OutputStream,
+    private val logger: KSPLogger
 ) : KSVisitorVoid() {
 
     override fun visitClassDeclaration(classDeclaration: KSClassDeclaration, data: Unit) {
         val screenType = getScreenValue(classDeclaration) ?: return
-        val navigationBuilder = classDeclaration.toNavigationBuilder() ?: return
+        val navigationBuilder = classDeclaration.toNavigationBuilder(logger) ?: return
         val packageName = "${classDeclaration.qualifiedName?.asString()}"
         file.addLine()
         appendImports(packageName)
