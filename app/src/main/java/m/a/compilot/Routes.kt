@@ -37,7 +37,7 @@ data class FullScreenWithNestedNullableArgRoute(
         val enum: EnumClass?
     ) {
         data class Test(
-            val tester: String
+            val tester: Long
         )
         enum class EnumClass {
             One

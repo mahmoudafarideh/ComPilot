@@ -171,16 +171,16 @@ sealed class DataClassParameters {
         enum class Type {
             Int, Float, Double, Long, Boolean, String;
 
-            fun getFromBundle(name: String, isNullable: Boolean): String {
+            fun getFromBundle(name: String, isNullable: Boolean, isParentNullable: Boolean?): String {
                 val nullableGetter =
                     if (isNullable) "getString(\"$name\", \"\").takeIf { it.isNotEmpty() }" else ""
                 var result = when (this.toString()) {
-                    "Int" -> if (isNullable) "$nullableGetter?.let { it.toInt() }" else "getInt(\"$name\")"
-                    "Float" -> if (isNullable) "$nullableGetter?.let { it.toFloat() }" else "getFloat(\"$name\")"
-                    "Double" -> if (isNullable) "$nullableGetter?.let { it.toDouble() }" else "getFloat(\"$name\").toDouble()"
-                    "String" -> "getString(\"$name\", \"\")"
-                    "Boolean" -> if (isNullable) "$nullableGetter?.let { it.toBoolean() }" else "getBoolean(\"$name\")"
-                    "Long" -> if (isNullable) "$nullableGetter?.let { it.toLong() }" else "getLong(\"$name\")"
+                    "Int" -> if (isNullable) "$nullableGetter?.let { it.toInt() }" else if(isParentNullable == true) "getString(\"$name\", \"0\").toInt()" else "getInt(\"$name\")"
+                    "Float" -> if (isNullable) "$nullableGetter?.let { it.toFloat() }" else if(isParentNullable == true) "getString(\"$name\", \"0\").toFloat()" else "getFloat(\"$name\")"
+                    "Double" -> if (isNullable) "$nullableGetter?.let { it.toDouble() }" else if(isParentNullable == true) "getString(\"$name\", \"0\").toDouble()" else "getFloat(\"$name\").toDouble()"
+                    "String" -> if (isNullable) "getString(\"$name\", null)" else "getString(\"$name\", \"\")"
+                    "Boolean" -> if (isNullable) "$nullableGetter?.let { it.toBoolean() }" else if(isParentNullable == true) "getString(\"$name\", \"false\").toBoolean()" else "getBoolean(\"$name\")"
+                    "Long" -> if (isNullable) "$nullableGetter?.let { it.toLong() }" else if(isParentNullable == true) "getString(\"$name\", \"0\").toLong()" else "getLong(\"$name\")"
                     else -> {
                         throw IllegalArgumentException("This Argument Type is not supported $this")
                     }
@@ -204,7 +204,7 @@ sealed class DataClassParameters {
 
         override fun getFromBundleString(prefix: String?): String {
             return "${this.name} = ${
-                type.getFromBundle("${prefix?.let { "$it." } ?: ""}$name", isNullable)
+                type.getFromBundle("${prefix?.let { "$it." } ?: ""}$name", isNullable, isParentNullable)
             }"
         }
     }
@@ -224,13 +224,13 @@ sealed class DataClassParameters {
             return if (!isNullable && isParentNullable != true) {
                 "$name = $clazz.valueOf(${
                     PrimitiveParameter.Type.String.getFromBundle(
-                        "${prefix?.let { "$it." } ?: ""}$name", false
+                        "${prefix?.let { "$it." } ?: ""}$name", false, isParentNullable
                     )
                 })"
             } else {
                 "$name = (${
                     PrimitiveParameter.Type.String.getFromBundle(
-                        "${prefix?.let { "$it." } ?: ""}$name", false
+                        "${prefix?.let { "$it." } ?: ""}$name", false, isParentNullable
                     )
                 })?.let { $clazz.valueOf(it) }"
             }
