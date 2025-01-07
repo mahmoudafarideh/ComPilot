@@ -276,7 +276,7 @@ sealed class DataClassParameters {
                             "                listOf(" +
                             arguments.joinToString(", ")
                             +").any {\n" +
-                            "                    this.containsKey(it)\n" +
+                            "                    this.containsKey(it) && this.getString(it).takeIf { it?.isNotBlank() == true } != null\n" +
                             "                } -> ")
                 } else {
                     append("$name = ")
