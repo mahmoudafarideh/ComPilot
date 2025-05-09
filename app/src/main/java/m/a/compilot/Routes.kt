@@ -39,6 +39,7 @@ data class FullScreenWithNestedNullableArgRoute(
         data class Test(
             val tester: Long
         )
+
         enum class EnumClass {
             One
         }
