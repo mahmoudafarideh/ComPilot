@@ -31,17 +31,20 @@ data class FullScreenWithNestedArgRoute(
 @RouteNavigation
 data class FullScreenWithNestedNullableArgRoute(
     val nested: NestedData?,
+    val nested2: NestedData,
 ) {
     data class NestedData(
         val test: Test?,
-        val enum: EnumClass?
+        val enum: EnumClass?,
+        val name: String
     ) {
         data class Test(
             val tester: Long
         )
 
         enum class EnumClass {
-            One
+            One,
+            Two
         }
     }
 

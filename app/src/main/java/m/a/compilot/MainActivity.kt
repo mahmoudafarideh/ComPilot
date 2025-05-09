@@ -45,9 +45,23 @@ class MainActivity : ComponentActivity() {
                         FullScreenRoute.screen(this) {
                             val navController = LocalNavController.comPilotNavController
                             LaunchedEffect(Unit) {
-                                if(it.argument.title == "Tesla") {
+                                if (it.argument.title == "Tesla") {
                                     delay(2_000)
-                                    navController.navigate(DialogRoute(1).navigator)
+                                    val route = FullScreenWithNestedNullableArgRoute(
+                                        nested = FullScreenWithNestedNullableArgRoute.NestedData(
+                                            null,
+                                            FullScreenWithNestedNullableArgRoute.NestedData.EnumClass.One,
+                                            "Name"
+                                        ),
+                                        nested2 = FullScreenWithNestedNullableArgRoute.NestedData(
+                                            FullScreenWithNestedNullableArgRoute.NestedData.Test(12),
+                                            FullScreenWithNestedNullableArgRoute.NestedData.EnumClass.Two,
+                                            ""
+                                        )
+                                    )
+                                    navController.navigate(
+                                        route.navigator
+                                    )
                                 }
                             }
                             val context = LocalContext.current
@@ -106,13 +120,26 @@ class MainActivity : ComponentActivity() {
                                         this.setInt("DialogId", it.argument.id)
                                     }
                                     .safePopBackStack()
-                                navController.safePopBackStack()
                             }
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(200.dp)
                                     .background(Color.Blue)
+                            )
+                        }
+                        FullScreenWithNestedNullableArgRoute.screen(this) {
+                            val navController = LocalNavController.comPilotNavController
+                            LaunchedEffect(Unit) {
+                                delay(2_000)
+                                navController.safePopBackStack()
+                                navController.navigate(DialogRoute(1).navigator)
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(200.dp)
+                                    .background(Color.Yellow)
                             )
                         }
                     }

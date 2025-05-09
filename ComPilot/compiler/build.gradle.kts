@@ -1,4 +1,7 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import com.vanniktech.maven.publish.SonatypeHost
+import java.io.FileInputStream
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.jetbrains.kotlin.jvm)
@@ -68,10 +71,12 @@ mavenPublishing {
 }
 
 signing {
+    val properties = Properties()
+    properties.load(FileInputStream(rootProject.file("local.properties")))
     useInMemoryPgpKeys(
-        getLocalProperty("publication.key"),
-        getLocalProperty("publication.secret"),
-        getLocalProperty("publication.password"),
+        properties.getProperty("publication.key"),
+        properties.getProperty("publication.secret"),
+        properties.getProperty("publication.password"),
     )
     sign(publishing.publications)
 }
