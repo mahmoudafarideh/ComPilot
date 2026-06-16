@@ -1,17 +1,16 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.ksp)
 }
 
 android {
     namespace = "m.a.compilot"
-    compileSdk = 34
+    compileSdk = 36
     defaultConfig {
         applicationId = "m.a.compilot"
-        minSdk = 21
-        targetSdk = 34
+        minSdk = 23
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -33,9 +32,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
     buildFeatures {
         compose = true
     }
@@ -45,16 +41,6 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
-    kotlin {
-        sourceSets {
-            debug {
-                kotlin.srcDir("build/generated/ksp/debug/kotlin")
-            }
-            release {
-                kotlin.srcDir("build/generated/ksp/debug/kotlin")
-            }
         }
     }
 }

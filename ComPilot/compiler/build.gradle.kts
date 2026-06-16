@@ -1,11 +1,10 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import com.vanniktech.maven.publish.SonatypeHost
 import java.io.FileInputStream
 import java.util.Properties
 
 plugins {
     alias(libs.plugins.jetbrains.kotlin.jvm)
-    id("com.vanniktech.maven.publish") version "0.28.0"
+    id("com.vanniktech.maven.publish") version "0.36.0"
     id("signing")
 }
 
@@ -22,7 +21,7 @@ kotlin {
 
 dependencies {
     implementation(libs.ksp)
-    implementation(libs.compilot.common)
+    implementation(project(":ComPilot:common"))
 }
 
 group = "io.github.mahmoudafarideh.compilot"
@@ -64,7 +63,7 @@ mavenPublishing {
     }
 
     // Configure publishing to Maven Central
-    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+    publishToMavenCentral()
 
     // Enable GPG signing for all publications
     signAllPublications()
@@ -75,7 +74,7 @@ signing {
     properties.load(FileInputStream(rootProject.file("local.properties")))
     useInMemoryPgpKeys(
         properties.getProperty("publication.key"),
-        properties.getProperty("publication.secret"),
+        properties.getProperty("publication.secretKey"),
         properties.getProperty("publication.password"),
     )
     sign(publishing.publications)

@@ -1,21 +1,20 @@
-import com.vanniktech.maven.publish.SonatypeHost
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.io.FileInputStream
 import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
-    id("com.vanniktech.maven.publish") version "0.28.0"
+    id("com.vanniktech.maven.publish") version "0.36.0"
     id("signing")
 }
 
 android {
     namespace = "m.a.compilot.navigation"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
-        minSdk = 21
+        minSdk = 23
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -34,14 +33,16 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-    kotlinOptions {
-        jvmTarget = "1.8"
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_1_8)
+        }
     }
 }
 
 dependencies {
     implementation(libs.compose.navigation)
-    api(libs.compilot.common)
+    api(project(":ComPilot:common"))
 }
 
 group = "io.github.mahmoudafarideh.compilot.kmp"
@@ -83,7 +84,7 @@ mavenPublishing {
     }
 
     // Configure publishing to Maven Central
-    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+    publishToMavenCentral()
 
     // Enable GPG signing for all publications
     signAllPublications()
@@ -94,7 +95,7 @@ signing {
     properties.load(FileInputStream(rootProject.file("local.properties")))
     useInMemoryPgpKeys(
         properties.getProperty("publication.key"),
-        properties.getProperty("publication.secret"),
+        properties.getProperty("publication.secretKey"),
         properties.getProperty("publication.password"),
     )
     sign(publishing.publications)
