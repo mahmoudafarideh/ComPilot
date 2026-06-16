@@ -20,7 +20,9 @@ kotlin {
     }
 }
 
-group = "io.github.mahmoudafarideh.compilot"
+val properties = Properties()
+properties.load(FileInputStream(rootProject.file("local.properties")))
+group = properties.getProperty("publication.group")
 version = libs.versions.compilotVersion.get()
 
 mavenPublishing {
